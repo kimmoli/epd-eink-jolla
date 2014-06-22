@@ -18,25 +18,18 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <linux/i2c-dev.h>
-#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #include <err.h>
 
 #include "gpio.h"
+#include "jollai2c.h"
 
 /* Private stuff */
 
 volatile unsigned char outputState = 0;
 
-int openDeviceFile(const char* name);
-bool writeBytes(unsigned char address, char bytes[], int length);
-bool readBytes(unsigned char address, char buffer[], int howManyBytesToRead);
-bool i2cWrite(int file, char buffer[], int buffer_length);
-bool i2cRead(int file, char buffer[], int howManyBytesToRead);
-bool setSlaveAddress(int file, unsigned char address);
 
 // set up access to the GPIO and PWM
 bool GPIO_setup() 
@@ -103,101 +96,3 @@ void GPIO_pwm_write(int pin, uint32_t value)
 	GPIO_write(GPIO_4, value>0 ? 1:0);
 }
 
-/* Private functions */
-
-int openDeviceFile(const char* name)
-{
-    int file = open(name, O_RDWR);
-    if (file < 0) 
-	{
-        printf("Device file open failed.\n");
-        return -1;
-    }
-    return file;
-}
-
-
-bool setSlaveAddress(int file, unsigned char address)
-{
-    if (ioctl(file, I2C_SLAVE, address) < 0) 
-	{
-        printf("ioctl failed.\n");
-        return false;
-    }
-    return true;
-}
-
-
-bool writeBytes(unsigned char address, char bytes[], int length)
-{
-    // try to open the device
-    int file = openDeviceFile("/dev/i2c-1");
-
-    if (file != -1) 
-	{
-        // set slave address
-        if (setSlaveAddress(file, address)) 
-		{
-            // try to perform the actual write
-            if (i2cWrite(file, bytes, length)) 
-			{
-                close(file);
-                return true;
-            }
-        }
-    }
-    close(file);
-    return false;
-}
-
-bool readBytes(unsigned char address, char buffer[], int howManyBytesToRead)
-{
-    if (howManyBytesToRead > 255)
-    {
-        printf("Reading too many bytes.\n");
-        return false;
-    }
-
-    // try to open the device
-    int file = openDeviceFile("/dev/i2c-1");
-
-    if (file != -1) 
-	{
-        // set slave address
-        if (setSlaveAddress(file, address)) 
-		{
-            // read from the register
-            if(i2cRead(file, buffer, howManyBytesToRead)) 
-			{
-                close(file);
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-
-bool i2cWrite(int file, char buffer[], int buffer_length)
-{
-    if (write(file, buffer, buffer_length) != buffer_length) 
-	{
-        close(file);
-        printf("Write failed.\n");
-        return false;
-    }
-
-    return true;
-}
-
-bool i2cRead(int file, char buffer[], int howManyBytesToRead)
-{
-    if (read(file, buffer, howManyBytesToRead) != howManyBytesToRead) 
-	{
-       close(file);
-       printf("Read failed.\n");
-       return false;
-    }
-
-    return true;
-}

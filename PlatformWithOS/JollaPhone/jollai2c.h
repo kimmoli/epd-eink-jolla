@@ -1,4 +1,5 @@
 // Copyright 2013 Pervasive Displays, Inc.
+// Copyright 2014 kimmoli <kimmo.lindholm@eke.fi>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +26,7 @@
 typedef struct SPI_struct SPI_type;
 
 
-// functions
+// functions wrapped from SPI to I2C really...
 // =========
 
 // enable SPI access SPI fd
@@ -49,5 +50,15 @@ void SPI_send(SPI_type *spi, const void *buffer, size_t length);
 // send a data block to SPI and return last bytes returned by slave
 // will only change CS if the SPI_CS bits are set
 void SPI_read(SPI_type *spi, const void *buffer, void *received, size_t length);
+
+// Actual I2C functions
+
+int openDeviceFile(const char* name);
+bool writeBytes(unsigned char address, char bytes[], int length);
+bool readBytes(unsigned char address, char buffer[], int howManyBytesToRead);
+bool i2cWrite(int file, char buffer[], int buffer_length);
+bool i2cRead(int file, char buffer[], int howManyBytesToRead);
+bool setSlaveAddress(int file, unsigned char address);
+
 
 #endif /* JOLLAI2C */

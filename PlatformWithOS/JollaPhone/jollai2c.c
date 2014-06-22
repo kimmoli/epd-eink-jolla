@@ -1,4 +1,5 @@
 // Copyright 2013 Pervasive Displays, Inc.
+// Copyright 2014 kimmoli <kimmo.lindholm@eke.fi>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +18,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <linux/i2c-dev.h>
+#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <err.h>
@@ -105,6 +108,7 @@ void SPI_send(SPI_type *spi, const void *buffer, size_t length)
 // will only change CS if the SPI_CS bits are set
 void SPI_read(SPI_type *spi, const void *buffer, void *received, size_t length) 
 {
+	/* TODO: This is used only with COG v2 , not needed now */
 }
 
 
@@ -113,4 +117,106 @@ void SPI_read(SPI_type *spi, const void *buffer, void *received, size_t length)
 
 static void set_spi_mode(SPI_type *spi, uint8_t mode) 
 {
+	/* Do nothing ?? */
+}
+
+
+// I2C Functions
+// ==================
+
+int openDeviceFile(const char* name)
+{
+    int file = open(name, O_RDWR);
+    if (file < 0) 
+	{
+        printf("Device file open failed.\n");
+        return -1;
+    }
+    return file;
+}
+
+
+bool setSlaveAddress(int file, unsigned char address)
+{
+    if (ioctl(file, I2C_SLAVE, address) < 0) 
+	{
+        printf("ioctl failed.\n");
+        return false;
+    }
+    return true;
+}
+
+
+bool writeBytes(unsigned char address, char bytes[], int length)
+{
+    // try to open the device
+    int file = openDeviceFile("/dev/i2c-1");
+
+    if (file != -1) 
+	{
+        // set slave address
+        if (setSlaveAddress(file, address)) 
+		{
+            // try to perform the actual write
+            if (i2cWrite(file, bytes, length)) 
+			{
+                close(file);
+                return true;
+            }
+        }
+    }
+    close(file);
+    return false;
+}
+
+bool readBytes(unsigned char address, char buffer[], int howManyBytesToRead)
+{
+    if (howManyBytesToRead > 255)
+    {
+        printf("Reading too many bytes.\n");
+        return false;
+    }
+
+    // try to open the device
+    int file = openDeviceFile("/dev/i2c-1");
+
+    if (file != -1) 
+	{
+        // set slave address
+        if (setSlaveAddress(file, address)) 
+		{
+            // read from the register
+            if(i2cRead(file, buffer, howManyBytesToRead)) 
+			{
+                close(file);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+
+bool i2cWrite(int file, char buffer[], int buffer_length)
+{
+    if (write(file, buffer, buffer_length) != buffer_length) 
+	{
+        close(file);
+        printf("Write failed.\n");
+        return false;
+    }
+
+    return true;
+}
+
+bool i2cRead(int file, char buffer[], int howManyBytesToRead)
+{
+    if (read(file, buffer, howManyBytesToRead) != howManyBytesToRead) 
+	{
+       close(file);
+       printf("Read failed.\n");
+       return false;
+    }
+
+    return true;
 }
