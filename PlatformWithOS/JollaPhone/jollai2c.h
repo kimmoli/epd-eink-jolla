@@ -21,6 +21,11 @@
 #include <stdbool.h>
 #include <unistd.h>
 
+#define I2C_ADDRESS 0x24
+#define GPIO_OUTPUT_REGISTER 0x02
+#define GPIO_INPUT_REGISTER 0x01
+#define I2C_SPI_BRIDGE 0x10
+
 
 // type to hold SPI data
 typedef struct SPI_struct SPI_type;

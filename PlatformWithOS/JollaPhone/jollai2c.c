@@ -101,7 +101,19 @@ void SPI_off(SPI_type *spi)
 // will only change CS if the SPI_CS bits are set
 void SPI_send(SPI_type *spi, const void *buffer, size_t length) 
 {
-	printf("spisend\n");
+	int n;
+	const char *ptr = ( const char * ) buffer;
+	
+	char buf[256];
+	
+	buf[0] = I2C_SPI_BRIDGE;
+	
+	for (n=0; n<length; n++)
+		buf[n+1] = *ptr++;
+	
+	printf("spisend %d bytes\n", length);
+	
+	writeBytes(I2C_ADDRESS, buf, length+1);
 }
 
 // send a data block to SPI and return last bytes returned by slave
@@ -109,6 +121,7 @@ void SPI_send(SPI_type *spi, const void *buffer, size_t length)
 void SPI_read(SPI_type *spi, const void *buffer, void *received, size_t length) 
 {
 	/* TODO: This is used only with COG v2 , not needed now */
+	printf("SPI_read() not implemented!\n");
 }
 
 
