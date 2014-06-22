@@ -75,6 +75,8 @@ static const uint32_t spi_bps = SPI_BPS;           // default SPI device speed
 // by sending text string e.g. shell:  echo 19 > /dev/epd/temperature
 static int temperature = 25;                       // for external temperature compensation
 
+volatile int led_test = 0;
+
 #define MAKE_STRING_HELPER(s) #s
 #define MAKE_STRING(s) MAKE_STRING_HELPER(s)
 
@@ -559,16 +561,23 @@ static void special_memcpy(char *d, const char *s, size_t size, bool bit_reverse
 }
 
 // run a command
-static void run_command(const char c) {
-	switch(c) {
+static void run_command(const char c) 
+{
+	switch(c) 
+	{
 	case 'T': // test
-		printf("epd test command received\n");
-		GPIO_write(GPIO_6, 1);
+		printf("epd test command received, toggling red led.\n");
+		if (led_test == 0)
+			led_test = 1;
+		else
+			led_test = 0;
+		GPIO_write(GPIO_6, led_test);
 		break;
 	case 'C':  // clear the display
 		EPD_set_temperature(epd, temperature);
 		EPD_begin(epd);
-		if (EPD_OK != EPD_status(epd)) {
+		if (EPD_OK != EPD_status(epd)) 
+		{
 			warn("EPD_begin failed");
 		}
 		EPD_clear(epd);
@@ -580,7 +589,8 @@ static void run_command(const char c) {
 	case 'U':  // update with contents of display
 		EPD_set_temperature(epd, temperature);
 		EPD_begin(epd);
-		if (EPD_OK != EPD_status(epd)) {
+		if (EPD_OK != EPD_status(epd)) 
+		{
 			warn("EPD_begin failed");
 		}
 #if EPD_COG_VERSION == 1
