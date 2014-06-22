@@ -572,6 +572,8 @@ static void run_command(const char c)
 		else
 			led_test = 0;
 		GPIO_write(GPIO_6, led_test);
+		
+		printf("Busy pin state is %d\n", GPIO_read(0));
 		break;
 	case 'C':  // clear the display
 		EPD_set_temperature(epd, temperature);

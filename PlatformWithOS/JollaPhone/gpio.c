@@ -64,8 +64,10 @@ int GPIO_read(int pin)
 	
 	writeBytes(I2C_ADDRESS, buf, 1);
 	readBytes(I2C_ADDRESS, buf, 1);
-	/* TODO */
-	if (buf[0] && 0x80)
+	
+	printf("readbytes %02x\n", buf[0]);
+	
+	if (buf[0] & 0x80)
 	{		
 		return 1;
 	} 

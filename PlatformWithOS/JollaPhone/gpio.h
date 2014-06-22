@@ -21,7 +21,7 @@
 
 #define I2C_ADDRESS 0x24
 #define GPIO_OUTPUT_REGISTER 2
-#define GPIO_INPUT_REGISTER 2
+#define GPIO_INPUT_REGISTER 1
 
 // pin types
 typedef enum {
