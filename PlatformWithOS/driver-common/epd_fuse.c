@@ -566,16 +566,15 @@ static void run_command(const char c)
 	switch(c) 
 	{
 	case 'T': // test
-		printf("epd test command received, toggling red led.\n");
+		printf("Test command received, toggling red led.\n");
 		if (led_test == 0)
 			led_test = 1;
 		else
 			led_test = 0;
 		GPIO_write(GPIO_6, led_test);
-		
-		printf("Busy pin state is %d\n", GPIO_read(0));
 		break;
 	case 'C':  // clear the display
+		printf("Clear display command received.\n");
 		EPD_set_temperature(epd, temperature);
 		EPD_begin(epd);
 		if (EPD_OK != EPD_status(epd)) 
@@ -589,6 +588,7 @@ static void run_command(const char c)
 		break;
 
 	case 'U':  // update with contents of display
+		printf("Update display command received.\n");
 		EPD_set_temperature(epd, temperature);
 		EPD_begin(epd);
 		if (EPD_OK != EPD_status(epd)) 
@@ -606,6 +606,7 @@ static void run_command(const char c)
 		break;
 
 	case 'P':  // partial update with contents of display
+		printf("Partial update display command received.\n");
 		EPD_set_temperature(epd, temperature);
 		EPD_begin(epd);
 		if (EPD_OK != EPD_status(epd)) {

@@ -110,9 +110,7 @@ void SPI_send(SPI_type *spi, const void *buffer, size_t length)
 	
 	for (n=0; n<length; n++)
 		buf[n+1] = *ptr++;
-	
-	printf("spisend %d bytes\n", length);
-	
+
 	writeBytes(I2C_ADDRESS, buf, length+1);
 }
 
