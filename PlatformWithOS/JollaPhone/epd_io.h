@@ -13,36 +13,17 @@
 // governing permissions and limitations under the License.
 
 
-#include <Arduino.h>
-#include <limits.h>
+#if !defined(EPD_IO_H)
+#define EPD_IO_H 1
 
-//#include <Adafruit_GFX.h>
-#include <EPD2.h>
-#include <S5813A.h>
+#define panel_on_pin  GPIO_1
+#define border_pin    GPIO_2
+#define discharge_pin GPIO_3
+#define pwm_pin       GPIO_4
+#define reset_pin     GPIO_0
+#define busy_pin      GPIO_5
 
-#include "EPD2_GFX.h"
+//#define SPI_DEVICE    "/dev/spidev0.0"
+//#define SPI_BPS       5000000
 
-
-void EPD_GFX::begin() {
-	int temperature = this->S5813A.read();
-
-	// erase display
-	this->EPD.begin();
-	this->EPD.setFactor(temperature);
-	this->EPD.clear();
-	this->EPD.end();
-
-	// clear buffers to white
-	memset(this->image, 0, sizeof(this->image));
-}
-
-
-void EPD_GFX::display() {
-	int temperature = this->S5813A.read();
-
-	// erase old, display new
-	this->EPD.begin();
-	this->EPD.setFactor(temperature);
-	this->EPD.image_sram(this->image);
-	this->EPD.end();
-}
+#endif

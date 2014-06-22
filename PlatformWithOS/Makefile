@@ -25,6 +25,11 @@ help:
 	@echo '   make bb-install     = install fuse driver in PREFIX'
 	@echo '   make bb-T           = build only target T'
 	@echo
+	@echo Jolla
+	@echo '   make jolla          = build all targets'
+	@echo '   make jolla-install  = install fuse driver in PREFIX'
+	@echo '   make jolla-T        = build only target T'
+	@echo
 	@echo Where T is one of:
 	@echo '    all install remove clean'
 	@echo '    epd_test gpio_test epd_fuse'
@@ -49,3 +54,11 @@ bb beaglebone:
 
 bb-%:
 	make PLATFORM=../BeagleBone COG_VERSION="${COG_VERSION}" EPD_IO="${EPD_IO}" -C driver-common $*
+
+	
+.PHONY: jolla jollaphone
+jolla jollaphone:
+	make PLATFORM=../JollaPhone COG_VERSION="${COG_VERSION}" EPD_IO="${EPD_IO}" -C driver-common
+
+jolla-%:
+	make PLATFORM=../JollaPhone COG_VERSION="${COG_VERSION}" EPD_IO="${EPD_IO}" -C driver-common $*

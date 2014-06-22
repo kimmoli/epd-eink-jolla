@@ -12,31 +12,15 @@
 // express or implied.  See the License for the specific language
 // governing permissions and limitations under the License.
 
-#if !defined(EPD_S5813A_H)
-#define EPD_S5813A_H 1
+#if !defined(GPIO_TEST_H)
+#define GPIO_TEST_H
 
-#include <Arduino.h>
+#include "gpio.h"
 
-class S5813A_Class {
-private:
-	int temperature_pin;
+#define LED_BLUE GPIO_P1_23
+#define LED_WHITE GPIO_P1_21
 
-	S5813A_Class(const S5813A_Class &f);  // prevent copy
+#define LED_PWM GPIO_P1_12
 
-public:
-	int read();
-	long readVoltage();  // returns micro volts
-
-	// inline static void attachInterrupt();
-	// inline static void detachInterrupt();
-
-	void begin(int input_pin);
-	void end();
-
-	S5813A_Class(int input_pin);
-
-};
-
-extern S5813A_Class S5813A;
 
 #endif
