@@ -23,7 +23,11 @@
 #include <signal.h>
 
 #include "gpio.h"
+#ifndef JOLLA
 #include "spi.h"
+#else
+#include "jollai2c.h"
+#endif
 #include "epd_v1.h"
 
 // delays - more consistent naming

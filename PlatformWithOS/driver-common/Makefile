@@ -14,6 +14,10 @@ CFLAGS += -Wall -Werror -std=gnu99
 CFLAGS += -I${PLATFORM}
 CFLAGS += -DEPD_IO='"${EPD_IO}"'
 
+ifeq ($(strip ${PLATFORM}),../JollaPhone)
+CFLAGS += -DJOLLA=1
+endif
+
 ifeq ($(strip ${COG_VERSION}),V1)
 CFLAGS += -DEPD_COG_VERSION=1
 EPD_H = epd_v1.h
@@ -36,8 +40,13 @@ RM = rm -f
 
 VPATH = .:${PLATFORM}
 
+# support only epd_fuse for Jolla
 .PHONY: all
+ifeq ($(strip ${PLATFORM}),../JollaPhone)
+all: epd_fuse
+else
 all: gpio_test epd_test epd_fuse
+endif
 
 EPD_FUSE_CONF = ${PLATFORM}/epd-fuse.conf
 EPD_FUSE_SH = ${PLATFORM}/epd-fuse.sh
@@ -83,10 +92,16 @@ test-fuse:
 
 
 # build the fuse driver
+ifeq ($(strip ${PLATFORM}),../JollaPhone)
+CLEAN_FILES += epd-fuse
+epd_fuse: epd_fuse.o gpio.o jollai2c.o ${EPD_O}
+	${CC} ${CFLAGS} ${LDFLAGS} -o "$@" epd_fuse.o gpio.o jollai2c.o ${EPD_O}
+else
 CLEAN_FILES += epd-fuse
 epd_fuse: epd_fuse.o gpio.o spi.o ${EPD_O}
 	${CC} ${CFLAGS} ${LDFLAGS} -o "$@" epd_fuse.o gpio.o spi.o ${EPD_O}
-
+endif
+	
 
 # build simple GPIO test program
 CLEAN_FILES += gpio_test

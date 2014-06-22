@@ -19,6 +19,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define I2C_ADDRESS 0x24
+#define GPIO_OUTPUT_REGISTER 2
+#define GPIO_INPUT_REGISTER 2
+
 // pin types
 typedef enum {
 	GPIO_0 = 0x01,	/* EINK_RESETL */
@@ -26,8 +30,16 @@ typedef enum {
 	GPIO_2 = 0x04,  /* EINK_BORDER */
 	GPIO_3 = 0x08,  /* EINK_DISCHARGE */
 	GPIO_4 = 0x10,  /* EINK_PWM */
-	GPIO_5 = 0x10   /* EINK_BUSY */
+	GPIO_5 = 0x80,  /* EINK_BUSY */
+	GPIO_6 = 0x20   /* Red led */
 } GPIO_pin_type;
+
+// GPIO modes
+typedef enum {
+        GPIO_INPUT,   // as input
+        GPIO_OUTPUT,  // as output
+        GPIO_PWM      // as PWM output (only for P1_12
+} GPIO_mode_type;
 
 // functions
 // =========

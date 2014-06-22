@@ -19,7 +19,7 @@ test -x "${DAEMON}" || exit 5
 
 # default configuration (change /etc/default/epd-fuse, not these)
 EPD_MOUNTPOINT=/dev/epd
-EPD_SIZE=2.0
+EPD_SIZE=2.7
 EPD_OPTS='-o allow_other -o default_permissions'
 
 if [ -r /etc/default/epd-fuse ]
@@ -31,7 +31,7 @@ case $1 in
   (start)
     log_daemon_msg "Starting EPD" "epd_fuse"
     mkdir -p "${EPD_MOUNTPOINT}"
-    modprobe spi-bcm2708
+#    modprobe spi-bcm2708
     "${DAEMON}" --panel="${EPD_SIZE}" ${EPD_OPTS} "${EPD_MOUNTPOINT}"
     log_end_msg "$?"
     ;;

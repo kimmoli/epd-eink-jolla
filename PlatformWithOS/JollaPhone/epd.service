@@ -1,0 +1,8 @@
+[Unit]
+Description=epd eink fuse
+
+[Service]
+ExecStart=/home/nemo/work/gratis/PlatformWithOS/driver-common/epd_fuse /tmp/epd --panel=2.7 -f -o allow_other -o default_permissions -o auto_unmount
+
+[Install]
+WantedBy=multi-user.target

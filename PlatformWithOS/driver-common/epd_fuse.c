@@ -31,7 +31,13 @@
 #include <err.h>
 
 #include "gpio.h"
+
+#ifdef JOLLA
+#include "jollai2c.h"
+#else
 #include "spi.h"
+#endif
+
 #if EPD_COG_VERSION == 1
 #include "epd_v1.h"
 #elif EPD_COG_VERSION == 2
@@ -42,8 +48,11 @@
 
 #include EPD_IO
 
-
+#ifdef JOLLA
+static const char version_buffer[] = {STR(VERSION) " JOLLA\n"};
+#else
 static const char version_buffer[] = {STR(VERSION) "\n"};
+#endif
 
 #define VERSION_SIZE (sizeof(version_buffer) - sizeof((char)'\0'))
 
@@ -57,8 +66,10 @@ static const char *display_inverted_path = "/display_inverse";  // the next imag
 static const char *command_path          = "/command";          // any write transfers display -> EPD and updates current
 static const char *temperature_path      = "/temperature";      // read/write temperature compensation setting
 
+#ifndef JOLLA
 static const char *spi_device = SPI_DEVICE;        // default SPI device path
 static const uint32_t spi_bps = SPI_BPS;           // default SPI device speed
+#endif
 
 // expect that external process changes this just before update command
 // by sending text string e.g. shell:  echo 19 > /dev/epd/temperature
@@ -417,12 +428,14 @@ static void *display_init(struct fuse_conn_info *conn) {
 		goto done;
 	}
 
+#ifndef JOLLA
 	spi = SPI_create(spi_device, spi_bps);
 	if (NULL == spi) {
 		warn("SPI_setup failed");
 		goto done_gpio;
 	}
-
+#endif
+	
 	GPIO_mode(panel_on_pin, GPIO_OUTPUT);
 	GPIO_mode(border_pin, GPIO_OUTPUT);
 	GPIO_mode(discharge_pin, GPIO_OUTPUT);
@@ -455,7 +468,9 @@ static void *display_init(struct fuse_conn_info *conn) {
 //        EPD_destroy(epd);
 done_spi:
 	SPI_destroy(spi);
+#ifndef JOLLA
 done_gpio:
+#endif
 	GPIO_teardown();
 done:
 	return NULL;
@@ -546,6 +561,10 @@ static void special_memcpy(char *d, const char *s, size_t size, bool bit_reverse
 // run a command
 static void run_command(const char c) {
 	switch(c) {
+	case 'T': // test
+		printf("epd test command received\n");
+		GPIO_write(GPIO_6, 1);
+		break;
 	case 'C':  // clear the display
 		EPD_set_temperature(epd, temperature);
 		EPD_begin(epd);
@@ -635,10 +654,18 @@ static int option_processor(void *data, const char *arg, int key, struct fuse_ar
 		     "\n"
 		     "Myfs options:\n"
 		     "    -o panel=SIZE     set panel size\n"
+#ifndef JOLLA
 		     "    -o spi=DEVICE     override default SPI device [%s]\n"
+#endif
 		     "    --panel=NUM       same as '-opanel=SIZE'\n"
+#ifndef JOLLA			 
 		     "    --spi=DEVICE      same as '-ospi=DEVICE'\n"
-		     , outargs->argv[0], spi_device);
+#endif
+		     , outargs->argv[0]
+#ifndef JOLLA
+			 , spi_device
+#endif
+			 );
 	     fuse_opt_add_arg(outargs, "-ho");
 	     fuse_main(outargs->argc, outargs->argv, &display_operations, NULL);
 	     exit(1);
@@ -660,7 +687,7 @@ static int option_processor(void *data, const char *arg, int key, struct fuse_ar
 	     }
 	     return 1;
      }
-
+#ifndef JOLLA
      case KEY_SPI: {
 	     const char *p = strchr(arg, '=');
 	     spi_device = strdup(p);
@@ -669,6 +696,7 @@ static int option_processor(void *data, const char *arg, int key, struct fuse_ar
 	     }
 	     return 1;
      }
+#endif	 
      }
      return 1;
 }
@@ -676,6 +704,13 @@ static int option_processor(void *data, const char *arg, int key, struct fuse_ar
 
 int main(int argc, char *argv[])
 {
+  	 umask(0);
+
+     setlinebuf(stdout);
+     setlinebuf(stderr);
+
+ 	 printf("epd_fuse start Version %s", version_buffer);
+	 
      struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
      memset(current_buffer, 0, sizeof(current_buffer));
